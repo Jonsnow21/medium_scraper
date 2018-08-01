@@ -8,5 +8,10 @@
     "start": "node index.js"
   },
   "author": "Neeraj Jha <neeraj14.nj@gmail.com>",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "cheerio": "^1.0.0-rc.2",
+    "mongoose": "^5.2.6"
+  }
 }
