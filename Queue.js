@@ -8,7 +8,7 @@ class Queue {
     }
 
     dequeue() {
-        this.items.shift();
+        return this.items.shift();
     }
 
     peek() {
@@ -23,3 +23,5 @@ class Queue {
         return this.items.length;
     }
 }
+
+module.exports = Queue;
