@@ -2,7 +2,7 @@ let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 
 let linkSchema = new Schema({
-    url: {type: String},
+    url: {type: String, unique: true},
     refCount: {type: Number},
     params: {type: Array},
 });
