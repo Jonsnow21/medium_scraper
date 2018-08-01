@@ -4,12 +4,15 @@ node_modules/
 # Optional npm cache directory
 .npm
 
-#mac ds store
+# Mac ds store
 *.DS_Store
 
-#IDEA files
+# IDEA files
 .idea/
 
 # Logs
 *.log
 npm-debug.log*
+
+# Data Mongodb
+data/
