@@ -1,0 +1,12 @@
+{
+  "name": "medium_scraper",
+  "version": "1.0.0",
+  "description": "A web scraper for Medium in Node.js on Docker",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Neeraj Jha <neeraj14.nj@gmail.com>",
+  "license": "ISC"
+}
