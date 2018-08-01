@@ -3,7 +3,7 @@ let Schema = mongoose.Schema;
 
 let linkSchema = new Schema({
     url: {type: String, unique: true},
-    refCount: {type: Number},
+    refCount: {type: Number, default: 1},
     params: {type: Array},
 });
 
