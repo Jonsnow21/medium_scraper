@@ -1,4 +1,4 @@
-const axios = require('axios');
+const request = require('request');
 const cheerio = require('cheerio');
 const bluebird = require('bluebird');
 const mongoose = require('mongoose');
@@ -6,68 +6,68 @@ const mongoose = require('mongoose');
 let Link = require('./link.model');
 let Queue = require('./Queue');
 
-let activeRequests = 0;
-let startUrl = `https://www.medium.com`;
-
 let maxRequest = 5;
+let activeRequests = 0;
+let startUrl = `https://medium.com`;
 
 setUpMongo();
 
+let urlSet = new Set();
 let queue = new Queue();
 queue.enqueue(startUrl);
 makeRequest();
 
-async function makeRequest() {
+function makeRequest() {
     try {
         if (activeRequests < maxRequest && !queue.isEmpty()) {
             activeRequests++;
-            let response = await axios.get(queue.dequeue());
-            let result = await handleResponse(response);
-            activeRequests--;
+            let url = queue.dequeue();
+
+            request(url, (err, response, body) => {
+                activeRequests--;
+                if (err) {
+                    console.log(`err ${err}`);
+                    throw new Error(err);
+                }
+                handleResponse(body);
+            });
         }
 
         setTimeout(() => {
             makeRequest();
-        }, 0);
+        }, 0)
     } catch (err) {
-        console.log(err);
+        makeRequest();
     }
 }
 
-async function handleResponse(res) {
-    let $ = cheerio.load(res.data);
-    let links = $.root().find('a');
-    console.log(links[0], links[1]);
-    $(links).each(async (i, link) => {
-        link = mediumRelativeUrl($(link).prop('href'));
-        console.log(link);
+function handleResponse(res) {
+    let $ = cheerio.load(res);
+    let links = $('a');
+    $(links).each((i, link) => {
+        link = $(link).attr('href');
         if (link && link.includes(startUrl)) {
             queue.enqueue(link);
-            let data = link.split('?');
-            let url = data[0];
-            let params = [];
-            if (data[1] && (data[1].length !== 0)) {
-                params = data[1].split('&');
-                params = params.map(param => {return param.split('=')[0]});
-            }
-
-            let update = await Link.update({url},{$set: {url}, $inc: {refCount: 1}, $addToSet: {params: {$each: params}}}, {upsert: true});
+            saveToDb(link);
         }
-
     });
 }
 
-function mediumRelativeUrl(url) {
-    if (typeof url === 'string') {
-        if (url.substring(0, 4) === 'http') {
-            return url;
-        } else {
-            let rg = new RegExp('^\\/ * ? ');
-            return `${startUrl}${url.replace(rg, "/")}`;
-        }
+function saveToDb(link) {
+    let data = link.split('?');
+    let url = data[0];
+
+    let params = [];
+    if (data[1] && (data[1].length !== 0)) {
+        params = data[1].split('&').map(param => {return param.split('=')[0]});
     }
 
-    return null;
+    if (urlSet.has(url)) {
+        Link.update({url},{$inc: {refCount: 1}, $addToSet: {params: {$each: params}}});
+    } else {
+        urlSet.add(url);
+        Link.create({url, params});
+    }
 }
 
 function setUpMongo() {
