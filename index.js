@@ -75,7 +75,9 @@ function setUpMongo() {
     let mongoOptions = {
         useNewUrlParser: true
     };
-    mongoose.connect(`mongodb://127.0.0.1:27017/medium_scrap`, mongoOptions);
+    mongoose.connect(`mongodb://mongo:27017/medium_scrap`, mongoOptions, () => {
+	mongoose.connection.db.dropDatabase();	
+    });
 
     mongoose.connection.on('error', (err) => {
         console.error(`Mongodb connection error ${err}`);
